@@ -59,17 +59,17 @@ const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton,
     </IonText>
     <IonButtons>
       <Tooltip title={UIText.generalClose} arrow>
-        <IonButton fill="clear" onClick={onClose}>
+        <IonButton fill="clear" onClick={onClose} title="">
           <IonIcon icon={closeSharp} />
         </IonButton>
       </Tooltip>
       <Tooltip title={UIText.generalRefresh} arrow>
-        <IonButton fill="clear" onClick={onRefresh}>
+        <IonButton fill="clear" onClick={onRefresh} title="">
           <IonIcon icon={refreshSharp} />
         </IonButton>
       </Tooltip>
       <Tooltip title={muted ? UIText.generalUnmute : UIText.generalMute} arrow>
-        <IonButton fill="clear" onClick={onMute}>
+        <IonButton fill="clear" onClick={onMute} title="">
           <IonIcon
             icon={
               muted
@@ -289,7 +289,7 @@ class MainPage extends React.Component {
     <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
       <IonText>{group.title}</IonText>
       <Tooltip arrow title={UIText.goToWindow} placement="left">
-        <IonButton className="noHover" fill="clear" size="small" onClick={e => this.handleWindowClick(e, group.id)}>
+        <IonButton className="noHover" fill="clear" title="" size="small" onClick={e => this.handleWindowClick(e, group.id)}>
           <IonIcon icon={browsersOutline} />
         </IonButton>
       </Tooltip>
@@ -353,7 +353,7 @@ class MainPage extends React.Component {
               placement="right"
               title={this.showOtherWindows ? UIText.showCurrentWindows : UIText.showAllWindows}
             >
-              <IonFabButton onClick={() => this.store.showOtherWindows = !this.store.showOtherWindows}>
+              <IonFabButton title="" onClick={() => this.store.showOtherWindows = !this.store.showOtherWindows}>
                 <MdIcon icon={this.showOtherWindows ? mdiCollapseAll : mdiExpandAll} />
               </IonFabButton>
             </Tooltip>
