@@ -40,6 +40,8 @@ const general = {
   generalDone: "Done",
   generalFinish: "Finish",
   generalHelp: "Help",
+  generalMute: "Mute",
+  generalUnmute: "Unmute",
   generalMore: "More",
   generalAnd: "And",
   generalOr: "Or",
@@ -81,6 +83,10 @@ const general = {
   searchForTabs: "Lookup Tabs",
   currentWindow: "Current window",
   otherWindow: "From other windows",
+
+  showAllWindows: "Show all windows",
+  showCurrentWindows: "Show only this window",
+  goToWindow: "Switch to this window",
 
   copyTitle: "Copy page title",
   copyUrl: "Copy URL",

@@ -37,4 +37,8 @@ export const getTabMenuItems = (tab: chrome.tabs.Tab): UIPopoverMenuItem[] => [
     text: UIText.openInPrivate,
     handler: () => chrome.windows.create({ url: tab.url, focused: true, incognito: true })
   }
-]
+];
+
+export const getQuickSearchItems = () => ([
+  "Audible", "Muted", "Active"
+]);

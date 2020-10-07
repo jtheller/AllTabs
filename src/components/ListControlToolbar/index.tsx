@@ -7,10 +7,11 @@ import { whenFulfill } from "../../utils/helpers";
 
 export interface ListControlToolbarProps extends React.HTMLProps<HTMLDivElement> {
   color?: PredefinedColors;
+  value?: string;
   debounce?: number;
   searchBarPlaceholder?: string;
   onSearchChange: (event: CustomEvent) => void;
-  onSelectModeToggle: (event: CustomEvent) => void;
+  onSearchIconClick: (event: CustomEvent) => void;
 }
 
 class ListControlToolbar extends React.Component<ListControlToolbarProps> {
@@ -29,12 +30,13 @@ class ListControlToolbar extends React.Component<ListControlToolbarProps> {
 
   searchBarRef = elm => this.searchBarElm = elm;
 
-  handleSearchIconClick = (event: any) => this.props.onSelectModeToggle && this.props.onSelectModeToggle(event);
+  handleSearchIconClick = (event: any) => this.props.onSearchIconClick && this.props.onSearchIconClick(event);
 
   render() {
     const {
       className,
       color,
+      value,
       debounce,
       searchBarPlaceholder,
       onSearchChange
@@ -45,7 +47,8 @@ class ListControlToolbar extends React.Component<ListControlToolbarProps> {
         className="ion-no-padding"
         debounce={debounce || 100}
         color={color}
-        searchIcon={checkmarkDoneSharp}
+        value={value}
+        // searchIcon={checkmarkDoneSharp}
         onIonChange={onSearchChange}
         placeholder={searchBarPlaceholder}
       />

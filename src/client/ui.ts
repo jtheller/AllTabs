@@ -132,7 +132,7 @@ export class UI extends Controller<UIStore> {
 
   popover = (options: Partial<PopoverOptions> & { component: React.FC, event: any }) => {
     if (isEmpty(options)) return;
-    if (options.event) options.event.persist();
+    if (options.event && options.event.persist) options.event.persist();
     const { component } = options;
     if (!!options.component) delete options.component;
     this.popoverProps = { ...options, ...this.withTranslucent };

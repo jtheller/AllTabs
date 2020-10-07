@@ -22,7 +22,7 @@ import ListControlToolbar from "../../components/ListControlToolbar";
 import { observer } from "mobx-react";
 import { defaultFavIconUrl } from "../../config/constants";
 import { UIText } from "../../client/lang";
-import { getTabMenuItems, matchTabs } from "../../lib/common";
+import { getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
 import { ui } from "../../client/ui";
 import {
   browsersOutline,
@@ -38,6 +38,7 @@ import { TabGroup } from "../../lib/types/dataTypes";
 import MdIcon from "../../components/MdIcon";
 import { mdiCollapseAll, mdiExpandAll } from "@mdi/js";
 import { Controller } from "../../lib/controller";
+import { Tooltip } from "@material-ui/core";
 
 const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
   <div
@@ -57,23 +58,29 @@ const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton,
       <span className="url">{tab.url}</span>
     </IonText>
     <IonButtons>
-      <IonButton fill="clear" onClick={onClose}>
-        <IonIcon icon={closeSharp} />
-      </IonButton>
-      <IonButton fill="clear" onClick={onRefresh}>
-        <IonIcon icon={refreshSharp} />
-      </IonButton>
-      <IonButton fill="clear" onClick={onMute}>
-        <IonIcon
-          icon={
-            muted
-              ? volumeMuteSharp
-              : audible
-              ? volumeHighOutline
-              : volumeOffOutline
-          }
-        />
-      </IonButton>
+      <Tooltip title={UIText.generalClose} arrow>
+        <IonButton fill="clear" onClick={onClose}>
+          <IonIcon icon={closeSharp} />
+        </IonButton>
+      </Tooltip>
+      <Tooltip title={UIText.generalRefresh} arrow>
+        <IonButton fill="clear" onClick={onRefresh}>
+          <IonIcon icon={refreshSharp} />
+        </IonButton>
+      </Tooltip>
+      <Tooltip title={muted ? UIText.generalUnmute : UIText.generalMute} arrow>
+        <IonButton fill="clear" onClick={onMute}>
+          <IonIcon
+            icon={
+              muted
+                ? volumeMuteSharp
+                : audible
+                ? volumeHighOutline
+                : volumeOffOutline
+            }
+          />
+        </IonButton>
+      </Tooltip>
       <IonButton fill="clear" onClick={onContextMenu}>
         <IonIcon icon={ellipsisVertical} />
       </IonButton>
@@ -96,6 +103,7 @@ class MainPage extends React.Component {
   @observable selectMode: boolean = false;
 
   @observable loading: boolean = true;
+  @observable fabOpen: boolean = false;
 
   controller = new Controller<MainStore>("mainPage");
   @computed get store() { return this.controller.store };
@@ -148,6 +156,7 @@ class MainPage extends React.Component {
       return this.getTabs();
     }
     this.tabs = require("../../test.json");
+    this.loading = false;
   };
 
   dispose = () => {
@@ -177,14 +186,24 @@ class MainPage extends React.Component {
     this.searchValue = getEventRealValue(event);
   };
 
-  handleSelectToggle = (event: any) => {
-    preventDefaultStopProp(event);
-    this.selectMode = !this.selectMode;
-    return ui.toast({
-      position: "top",
-      message: UIText.comingSoon
-    });
-  };
+  // handleSelectToggle = (event: any) => {
+  //   preventDefaultStopProp(event);
+  //   this.selectMode = !this.selectMode;
+  //   return ui.toast({
+  //     position: "top",
+  //     message: UIText.comingSoon
+  //   });
+  // };
+
+  handleQuickSearchMenu = (event: any) =>
+    ui.popoverMenu({
+      event,
+      menuItems: getQuickSearchItems().map(item => ({
+        text: item,
+        handler: () => this.searchValue = item
+      })),
+      showBackdrop: false
+    })
 
   handleTabClick = (event: any, id: number) => {
     preventDefaultStopProp(event);
@@ -216,7 +235,6 @@ class MainPage extends React.Component {
   };
 
   handleMenu = (event: any, id: number) => {
-    event.persist();
     preventDefaultStopProp(event);
     const tab = this.allTabs.find(tab => tab.id === id);
     if (!tab) return;
@@ -270,9 +288,11 @@ class MainPage extends React.Component {
   renderTabGroup = group => <>
     <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
       <IonText>{group.title}</IonText>
-      <IonButton className="noHover" fill="clear" size="small" onClick={e => this.handleWindowClick(e, group.id)}>
-        <IonIcon icon={browsersOutline} />
-      </IonButton>
+      <Tooltip arrow title={UIText.goToWindow} placement="left">
+        <IonButton className="noHover" fill="clear" size="small" onClick={e => this.handleWindowClick(e, group.id)}>
+          <IonIcon icon={browsersOutline} />
+        </IonButton>
+      </Tooltip>
     </IonListHeader>
     {group.tabs.map(this.renderTabItem)}
   </>;
@@ -282,11 +302,12 @@ class MainPage extends React.Component {
       <IonHeader translucent>
         <ListControlToolbar
           className="searchTool"
-          color="light"
+          color="primary"
+          value={this.searchValue}
           debounce={50}
           searchBarPlaceholder={UIText.searchForTabs}
           onSearchChange={this.handleSearchChange}
-          onSelectModeToggle={this.handleSelectToggle}
+          onSearchIconClick={this.handleQuickSearchMenu}
         />
       </IonHeader>
       <IonContent>
@@ -317,18 +338,25 @@ class MainPage extends React.Component {
         )}
 
         <IonFab
+          activated={this.fabOpen}
           className="noHover"
           vertical="bottom"
           horizontal="center"
           slot="fixed"
         >
-          <IonFabButton>
+          <IonFabButton onClick={() => this.fabOpen = !this.fabOpen}>
             <IonIcon icon={optionsOutline} />
           </IonFabButton>
           <IonFabList side="top">
-            <IonFabButton onClick={() => this.store.showOtherWindows = !this.store.showOtherWindows}>
-              <MdIcon icon={this.showOtherWindows ? mdiCollapseAll : mdiExpandAll} />
-            </IonFabButton>
+            <Tooltip
+              arrow
+              placement="right"
+              title={this.showOtherWindows ? UIText.showCurrentWindows : UIText.showAllWindows}
+            >
+              <IonFabButton onClick={() => this.store.showOtherWindows = !this.store.showOtherWindows}>
+                <MdIcon icon={this.showOtherWindows ? mdiCollapseAll : mdiExpandAll} />
+              </IonFabButton>
+            </Tooltip>
           </IonFabList>
         </IonFab>
       </IonContent>

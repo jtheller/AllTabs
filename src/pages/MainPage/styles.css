@@ -210,9 +210,6 @@ ion-item > .readonlyIconStyle {
     background-color: #00000030;
   }
 }
-.mainPage .searchTool {
-  border-bottom: 1px solid var(--ion-item-border-color, var(--ion-border-color, var(--ion-color-step-150, rgba(0, 0, 0, 0.13))));
-}
 .mainPage .searchTool ion-searchbar {
   --box-shadow: none !important;
 }
@@ -224,7 +221,9 @@ ion-item > .readonlyIconStyle {
   border-bottom: 1px solid var(--ion-item-border-color, var(--ion-border-color, var(--ion-color-step-150, rgba(0, 0, 0, 0.13))));
 }
 .mainPage .tabItem.active {
-  border-bottom: 2px solid var(--ion-color-success);
+  padding: 5px 0 5px 6px;
+  border-left: 4px solid var(--ion-color-success);
+  box-shadow: 0 0 10px 2px #ececec;
 }
 .mainPage .tabItem .favicon {
   width: 24px;

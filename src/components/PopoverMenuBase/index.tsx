@@ -22,7 +22,7 @@ export const PopoverMenuBase = (menuItems: UIPopoverMenuItem[], dismiss?: (event
             icon={item.icon}
           />
         ) : item.icon}
-        <IonText color={(!item.fill || item.fill === "clear") ? item.color : "light"}>
+        <IonText className="font-s" color={(!item.fill || item.fill === "clear") ? item.color : "light"}>
           {item.text}
         </IonText>
       </IonItem>
