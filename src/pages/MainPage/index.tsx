@@ -20,7 +20,7 @@ import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp } from ".
 import { env } from "../../config/env";
 import "./styles.css";
 import ListControlToolbar from "../../components/ListControlToolbar";
-import { observer } from "mobx-react";
+import { observer, Observer } from "mobx-react";
 import { defaultFavIconUrl } from "../../config/constants";
 import { UIText } from "../../client/lang";
 import { getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
@@ -40,13 +40,14 @@ import MdIcon from "../../components/MdIcon";
 import { mdiCollapseAll, mdiExpandAll } from "@mdi/js";
 import { Controller } from "../../lib/controller";
 import { Tooltip } from "@material-ui/core";
+import { ObserverList } from "../../components/ObserverList";
 
 
 // TODO: When components grow to a point, part them out.
-const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
+const TabItem = observer(({ tab, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
   <div
     key={tab.id}
-    className={`flex relative ion-activatable ion-align-items-center tabItem ${active ? "active" : ""}`}
+    className={`flex relative ion-activatable ion-align-items-center tabItem ${tab.active ? "active" : ""}`}
     onClick={onClick}
     onContextMenu={onContextMenu}
     onMouseDown={onMouseButton}
@@ -71,13 +72,13 @@ const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton,
           <IonIcon icon={refreshSharp} />
         </IonButton>
       </Tooltip>
-      <Tooltip title={muted ? UIText.generalUnmute : UIText.generalMute} arrow>
+      <Tooltip title={tab.muted ? UIText.generalUnmute : UIText.generalMute} arrow>
         <IonButton fill="clear" onClick={onMute} title="">
           <IonIcon
             icon={
-              muted
+              tab.muted
                 ? volumeMuteSharp
-                : audible
+                : tab.audible
                 ? volumeHighOutline
                 : volumeOffOutline
             }
@@ -288,31 +289,40 @@ class MainPage extends React.Component {
     return chrome.tabs.update(tab.id, { muted: !tab.mutedInfo.muted });
   };
 
-  renderTabItem = (tab: chrome.tabs.Tab) => <TabItem
-    key={tab.id}
-    tab={tab}
-    audible={tab.audible}
-    muted={tab.mutedInfo.muted}
-    active={tab.active}
-    onClose={e => this.handleClose(e, tab.id)}
-    onRefresh={e => this.handleRefresh(e, tab.id)}
-    onMute={e => this.handleMute(e, tab.id)}
-    onClick={e => this.handleTabClick(e, tab.id)}
-    onMouseButton={e => this.handleMouseButton(e, tab.id)}
-    onContextMenu={e => this.handleMenu(e, tab.id)}
+  renderTabs = (tabs: chrome.tabs.Tab[]) => <ObserverList
+    list={tabs}
+    render={tab => <TabItem
+      key={tab.id}
+      tab={tab}
+      onClose={e => this.handleClose(e, tab.id)}
+      onRefresh={e => this.handleRefresh(e, tab.id)}
+      onMute={e => this.handleMute(e, tab.id)}
+      onClick={e => this.handleTabClick(e, tab.id)}
+      onMouseButton={e => this.handleMouseButton(e, tab.id)}
+      onContextMenu={e => this.handleMenu(e, tab.id)}
+    />}
   />;
 
-  renderTabGroup = group => <>
-    <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
-      <IonText>{group.title}</IonText>
-      <Tooltip arrow title={UIText.goToWindow} placement="left">
-        <IonButton className="noHover" fill="clear" title="" size="small" onClick={e => this.handleWindowClick(e, group.id)}>
-          <IonIcon icon={browsersOutline} />
-        </IonButton>
-      </Tooltip>
-    </IonListHeader>
-    {group.tabs.map(this.renderTabItem)}
-  </>;
+  renderTabGroups = groups => <ObserverList
+    list={groups}
+    render={group => <>
+      <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
+        <IonText>{group.title}</IonText>
+        <Tooltip arrow title={UIText.goToWindow} placement="left">
+          <IonButton
+            className="noHover"
+            fill="clear"
+            title=""
+            size="small"
+            onClick={e => this.handleWindowClick(e, group.id)}
+          >
+            <IonIcon icon={browsersOutline} />
+          </IonButton>
+        </Tooltip>
+      </IonListHeader>
+      {this.renderTabs(group.tabs)}
+    </>}
+  />;
 
   render() {
     return <IonPage className="mainPage">
@@ -335,21 +345,21 @@ class MainPage extends React.Component {
                 <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
                   <IonText>{UIText.currentWindow}</IonText>
                 </IonListHeader>
-                {this.filteredTabs.map(this.renderTabItem)}
+                {this.renderTabs(this.filteredTabs)}
               </>}
-              {!isEmpty(this.filteredOtherTabGroups) && this.filteredOtherTabGroups.map(this.renderTabGroup)}
+              {!isEmpty(this.filteredOtherTabGroups) && this.renderTabGroups(this.filteredOtherTabGroups)}
             </IonList>
           ) : this.showOtherWindows ? (
             <IonList className="ion-no-padding">
               <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
                 <IonText>{UIText.currentWindow}</IonText>
               </IonListHeader>
-              {this.tabs.map(this.renderTabItem)}
-              {this.otherTabGroups.map(this.renderTabGroup)}
+              {this.renderTabs(this.tabs)}
+              {this.renderTabGroups(this.otherTabGroups)}
             </IonList>
           ) : (
             <IonList className="ion-no-padding">
-              {this.tabs.map(this.renderTabItem)}
+              {this.renderTabs(this.tabs)}
             </IonList>
           )
         )}
