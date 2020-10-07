@@ -13,6 +13,7 @@ import {
   IonPage,
   IonRippleEffect,
   IonText,
+  IonChip,
 } from "@ionic/react";
 import { computed, observable } from "mobx";
 import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp } from "../../utils/helpers";
@@ -40,6 +41,8 @@ import { mdiCollapseAll, mdiExpandAll } from "@mdi/js";
 import { Controller } from "../../lib/controller";
 import { Tooltip } from "@material-ui/core";
 
+
+// TODO: When components grow to a point, part them out.
 const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
   <div
     key={tab.id}
@@ -86,6 +89,15 @@ const TabItem = observer(({ tab, audible, muted, active, onClick, onMouseButton,
       </IonButton>
     </IonButtons>
     <IonRippleEffect />
+  </div>
+));
+
+const QuickSearchPanel = observer(({ items }) => (
+  <div className="flex column">
+    <IonText color="primary" className="ion-padding font-xs">{UIText.quickSearch}</IonText>
+    <div className="flex ion-align-items-center ion-padding-horizontal ion-padding-bottom">
+      {items.map(item => <IonChip key={item.text} onClick={item.handler}>{item.text}</IonChip>)}
+    </div>
   </div>
 ));
 
@@ -196,14 +208,19 @@ class MainPage extends React.Component {
   // };
 
   handleQuickSearchMenu = (event: any) =>
-    ui.popoverMenu({
+    ui.popover({
       event,
-      menuItems: getQuickSearchItems().map(item => ({
-        text: item,
-        handler: () => this.searchValue = item
-      })),
+      component: () => <QuickSearchPanel
+        items={getQuickSearchItems().map(item => ({
+          text: item,
+          handler: () => {
+            this.searchValue = item;
+            return ui.dismissPopover()
+          }
+        }))}
+      />,
       showBackdrop: false
-    })
+    });
 
   handleTabClick = (event: any, id: number) => {
     preventDefaultStopProp(event);

@@ -81,6 +81,7 @@ const general = {
   swipeRevealHintRight: "Swipe right to see more options",
 
   searchForTabs: "Lookup Tabs",
+  quickSearch: "Quick search",
   currentWindow: "Current window",
   otherWindow: "From other windows",
 
