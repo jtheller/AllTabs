@@ -223,11 +223,13 @@ ion-item > .readonlyIconStyle {
 .mainPage .tabItem.active {
   padding: 5px 0 5px 6px;
   border-left: 4px solid var(--ion-color-success);
-  box-shadow: 0 0 10px 2px #ececec;
+}
+.mainPage .tabItem.active.focused {
+  box-shadow: inset 0 0 7px -1px #cfcfcf;
 }
 .mainPage .tabItem .favicon {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   margin-right: 10px;
 }
 .mainPage .tabItem .contentText {

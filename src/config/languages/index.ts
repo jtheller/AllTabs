@@ -9,15 +9,5 @@ export const languages: LanguageType[] = [
     description: "English (Canada)",
     dictionary: English_Canada,
     default: true
-  },
-  {
-    id: "fr-CA",
-    description: "Français (Canada)",
-    dictionary: {}
-  },
-  {
-    id: "vi",
-    description: "Tiếng Việt",
-    dictionary: {}
   }
 ];

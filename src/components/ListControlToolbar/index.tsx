@@ -2,7 +2,6 @@ import { IonSearchbar } from "@ionic/react";
 import React from "react";
 import "./styles.css";
 import { PredefinedColors } from "@ionic/core";
-import { checkmarkDoneSharp } from "ionicons/icons";
 import { whenFulfill } from "../../utils/helpers";
 
 export interface ListControlToolbarProps extends React.HTMLProps<HTMLDivElement> {

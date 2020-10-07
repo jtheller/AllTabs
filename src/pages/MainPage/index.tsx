@@ -2,6 +2,7 @@ import React from "react";
 import {
   IonButton,
   IonButtons,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -13,14 +14,13 @@ import {
   IonPage,
   IonRippleEffect,
   IonText,
-  IonChip,
 } from "@ionic/react";
 import { computed, observable } from "mobx";
 import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp } from "../../utils/helpers";
 import { env } from "../../config/env";
 import "./styles.css";
 import ListControlToolbar from "../../components/ListControlToolbar";
-import { observer, Observer } from "mobx-react";
+import { observer } from "mobx-react";
 import { defaultFavIconUrl } from "../../config/constants";
 import { UIText } from "../../client/lang";
 import { getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
@@ -44,10 +44,10 @@ import { ObserverList } from "../../components/ObserverList";
 
 
 // TODO: When components grow to a point, part them out.
-const TabItem = observer(({ tab, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
+const TabItem = observer(({ tab, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
   <div
     key={tab.id}
-    className={`flex relative ion-activatable ion-align-items-center tabItem ${tab.active ? "active" : ""}`}
+    className={`flex relative ion-activatable ion-align-items-center tabItem ${tab.active ? "active" : ""} ${focused ? "focused" : ""}`}
     onClick={onClick}
     onContextMenu={onContextMenu}
     onMouseDown={onMouseButton}
@@ -55,7 +55,8 @@ const TabItem = observer(({ tab, onClick, onMouseButton, onContextMenu, onClose,
     <img
       className="favicon"
       src={tab.favIconUrl || defaultFavIconUrl}
-      alt={tab.title}
+      alt=""
+      onError={e => e.currentTarget.src = defaultFavIconUrl}
     />
     <IonText className="flex column font-xxs contentText">
       <span className="title textBold">{tab.title}</span>
@@ -153,7 +154,7 @@ class MainPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.initialize();
+    setTimeout(this.initialize, 100);
   }
 
   componentWillUnmount(): void {
@@ -294,6 +295,7 @@ class MainPage extends React.Component {
     render={tab => <TabItem
       key={tab.id}
       tab={tab}
+      focused={tab.windowId === this.windowId}
       onClose={e => this.handleClose(e, tab.id)}
       onRefresh={e => this.handleRefresh(e, tab.id)}
       onMute={e => this.handleMute(e, tab.id)}
@@ -341,7 +343,11 @@ class MainPage extends React.Component {
         {!this.loading && (
           this.searchValue ? (
             <IonList className="ion-no-padding">
-              {!isEmpty(this.filteredTabs) && <>
+              {isEmpty(this.filteredTabs) ? (
+                <div className="flex ion-padding ion-text-center ion-justify-content-center">
+                  <IonText color="medium">深海シティアンダーぐらあああ～～♫</IonText>
+                </div>
+              ) : <>
                 <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
                   <IonText>{UIText.currentWindow}</IonText>
                 </IonListHeader>
