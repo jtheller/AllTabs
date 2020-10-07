@@ -1,0 +1,5 @@
+.listControlToolbar ion-searchbar .searchbar-search-icon {
+  color: var(--ion-color-primary) !important;
+  cursor: pointer;
+  pointer-events: all;
+}

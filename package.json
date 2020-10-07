@@ -1,0 +1,73 @@
+{
+  "name": "com.jtworks.chrome-ext.alltabs",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^1.5.0",
+    "@capacitor/core": "1.4.0",
+    "@ionic/react": "^5.0.4",
+    "@ionic/react-router": "^5.0.4",
+    "@mdi/js": "^5.3.45",
+    "@mdi/react": "^1.4.0",
+    "@types/jest": "^24.9.1",
+    "@types/node": "^12.12.29",
+    "@types/react": "^16.9.23",
+    "@types/react-dom": "^16.9.1",
+    "@types/react-router": "^5.1.1",
+    "@types/react-router-dom": "^5.1.0",
+    "auto-bind": "^4.0.0",
+    "axios": "^0.19.2",
+    "compression": "^1.7.4",
+    "express": "^4.17.1",
+    "fast-deep-equal": "^2.0.1",
+    "ionicons": "^5.0.0",
+    "mobx": "^5.15.4",
+    "mobx-react": "^6.1.8",
+    "mobx-utils": "^5.5.5",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-reveal": "^1.2.2",
+    "react-router": "^5.1.0",
+    "react-router-dom": "^5.1.0",
+    "react-scripts": "3.2.0",
+    "react-visibility-sensor": "^5.1.1",
+    "typescript": "3.6.3",
+    "urlsafe-base64": "^1.0.0"
+  },
+  "scripts": {
+    "start": "npm-run-all --parallel grunt-start react-start",
+    "build": "npx grunt build && react-scripts build --profile && node post-build.js",
+    "serve": "npm run build && node server",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "grunt-start": "npx grunt",
+    "react-start": "react-scripts start"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "description": "An Ionic project",
+  "devDependencies": {
+    "@capacitor/cli": "1.4.0",
+    "@types/chrome": "0.0.124",
+    "@types/googlemaps": "^3.39.11",
+    "grunt": "^1.2.1",
+    "grunt-contrib-less": "^2.0.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "npm-run-all": "^4.1.5",
+    "tslint": "^6.0.0",
+    "tslint-react": "^4.2.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "com.jtworks.chrome-ext.alltabs",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

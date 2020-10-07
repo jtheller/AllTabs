@@ -1,0 +1,24 @@
+.accordion {
+
+  ion-button {
+    --border-radius: 0;
+  }
+
+  .accordionHeaderButton {
+    flex: 1;
+    overflow: hidden;
+
+    .accordionHeaderTitle {
+      flex: 1;
+      line-height: 20px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  &.animated {
+    .accordionContent {
+      transition: max-height .5s ease;
+    }
+  }
+}
