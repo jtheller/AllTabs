@@ -72,11 +72,11 @@ const TabItem = observer(({ tab, onClick, onMouseButton, onContextMenu, onClose,
           <IonIcon icon={refreshSharp} />
         </IonButton>
       </Tooltip>
-      <Tooltip title={tab.muted ? UIText.generalUnmute : UIText.generalMute} arrow>
+      <Tooltip title={tab.mutedInfo.muted ? UIText.generalUnmute : UIText.generalMute} arrow>
         <IonButton fill="clear" onClick={onMute} title="">
           <IonIcon
             icon={
-              tab.muted
+              tab.mutedInfo.muted
                 ? volumeMuteSharp
                 : tab.audible
                 ? volumeHighOutline
