@@ -1,0 +1,7 @@
+html, body {
+    width: 780px !important;
+    height: 600px !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
