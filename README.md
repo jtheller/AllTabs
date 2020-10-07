@@ -7,6 +7,7 @@ A Chromium extension to view and manage opened tabs.<br><br>
 - Continuous delivery through network load.
 - Disable default chunking.
 - Improve performance with a large amount of tabs in single window.
+    - Implement virtual scroll.
 - Move Fab to horizontal toolbar.
 - Add re-ordering.
 - Add backup.
