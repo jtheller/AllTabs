@@ -164,32 +164,6 @@ export const ipsum = () => `
     veniam, quis nostrud exercitation ullamco est laborum.
   `;
 
-export const getDisplayNameEng = profile => {
-  if (!profile) return "";
-  if (profile.data) {
-    if (typeof profile.data === "string") {
-      profile = safeParseJSON(profile.data);
-    } else {
-      profile = profile.data;
-    }
-  }
-  return (
-    profile.displayName ||
-    ((profile.firstName || profile.lastName) &&
-      `${profile.firstName || ""} ${profile.lastName || ""}`) ||
-    ""
-  );
-};
-
-export const abbvLastNameDisplayNameEng = displayName => {
-  if (!displayName) return "";
-  const split = displayName.split(/\s+/g);
-  const firstName = split[0];
-  const lastName = split[1];
-  const lastNameAbbv = lastName && lastName.substring(0, 1) + ".";
-  return `${firstName}${lastNameAbbv && ` ${lastNameAbbv}`}`;
-};
-
 export const getTimeString24 = date => {
   return (
     date &&
@@ -291,81 +265,6 @@ export const passwordRegExp = {
   upperLowerNum8: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*()\-_=+,.?"':{}[\]|<>`/\\]{8,}$/g,
   upperLowerNumSpec8: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+,.?"':{}[\]|<>`/\\])[A-Za-z\d!@#$%^&*()\-_=+,.?"':{}[\]|<>`/\\]{8,}$/g,
 };
-
-// export const validatePassword = (fieldData, field, error, noError, UIText) => {
-//   const selectedRegExp = passwordRegExp.lowerNum8;
-//
-//   if (field === "oldPassword") {
-//     if (!fieldData.oldPassword) {
-//       error.anyPassword = true;
-//       return (
-//         !noError &&
-//         (error.oldPassword = `${UIText.entryRequiring} ${UIText.oldPassword}`)
-//       );
-//     }
-//
-//     if (fieldData.password && fieldData.password === fieldData.oldPassword) {
-//       error.anyPassword = true;
-//       return (
-//         !noError && (error.password = UIText.changePasswordSamePasswordError)
-//       );
-//     } else {
-//       error.password = "";
-//     }
-//
-//     error.oldPassword = "";
-//   }
-//
-//   if (field === "password") {
-//     if (!fieldData.password) {
-//       error.anyPassword = true;
-//       return (
-//         !noError &&
-//         (error.password = `${UIText.entryRequiring} ${UIText.password}`)
-//       );
-//     }
-//
-//     if (!selectedRegExp.exp.test(fieldData.password)) {
-//       error.anyPassword = true;
-//       return !noError && (error.password = selectedRegExp.error);
-//     }
-//
-//     if (fieldData.oldPassword && fieldData.password === fieldData.oldPassword) {
-//       error.anyPassword = true;
-//       return (
-//         !noError && (error.password = UIText.changePasswordSamePasswordError)
-//       );
-//     } else {
-//       error.password = "";
-//     }
-//
-//     if (fieldData.repeat && fieldData.password !== fieldData.repeat) {
-//       error.anyPassword = true;
-//       return (error.repeat = UIText.registrationPasswordNotMatch);
-//     } else {
-//       error.repeat = "";
-//     }
-//
-//     error.password = "";
-//   }
-//
-//   if (field === "repeat") {
-//     if (!fieldData.repeat) {
-//       error.anyPassword = true;
-//       return !noError && (error.repeat = UIText.registrationConfirmPassword);
-//     }
-//
-//     if (fieldData.password !== fieldData.repeat) {
-//       error.anyPassword = true;
-//       return !noError && (error.repeat = UIText.registrationPasswordNotMatch);
-//     }
-//
-//     error.repeat = "";
-//   }
-//
-//   if (!error.oldPassword && !error.password && !error.repeat)
-//     error.anyPassword = false;
-// };
 
 export const getPriceString = (amount, symbol, comma) => {
   if (!amount || isNaN(amount)) return "";
