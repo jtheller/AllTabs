@@ -2,15 +2,17 @@ import { IonSearchbar } from "@ionic/react";
 import React from "react";
 import "./styles.css";
 import { PredefinedColors } from "@ionic/core";
-import { whenFulfill } from "../../utils/helpers";
+import { preventDefaultStopProp, whenFulfill } from "../../utils/helpers";
+import { Tooltip } from "@material-ui/core";
 
 export interface ListControlToolbarProps extends React.HTMLProps<HTMLDivElement> {
   color?: PredefinedColors;
   value?: string;
   debounce?: number;
   searchBarPlaceholder?: string;
+  searchIconTooltip?: string;
   onSearchChange: (event: CustomEvent) => void;
-  onSearchIconClick: (event: CustomEvent) => void;
+  onSearchIconClick: (event: any) => void;
 }
 
 class ListControlToolbar extends React.Component<ListControlToolbarProps> {
@@ -38,19 +40,25 @@ class ListControlToolbar extends React.Component<ListControlToolbarProps> {
       value,
       debounce,
       searchBarPlaceholder,
-      onSearchChange
+      searchIconTooltip,
+      onSearchChange,
+      onSearchIconClick
     } = this.props;
     return <div className={`flex search listControlToolbar ${className || ""}`}>
       <IonSearchbar
         ref={this.searchBarRef}
-        className="ion-no-padding"
+        className="ion-no-padding relative"
         debounce={debounce || 100}
         color={color}
         value={value}
         // searchIcon={checkmarkDoneSharp}
         onIonChange={onSearchChange}
         placeholder={searchBarPlaceholder}
-      />
+      >
+        {searchIconTooltip && <Tooltip title={searchIconTooltip} arrow>
+          <div className="searchIconTooltipHolder absolute" onClick={onSearchIconClick} />
+        </Tooltip>}
+      </IonSearchbar>
     </div>;
   }
 }

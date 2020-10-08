@@ -41,6 +41,7 @@ import { mdiCollapseAll, mdiExpandAll } from "@mdi/js";
 import { Controller } from "../../lib/controller";
 import { Tooltip } from "@material-ui/core";
 import { ObserverList } from "../../components/ObserverList";
+import FullScreenSpinner from "../../components/FullScreenSpinner";
 
 
 // TODO: When components grow to a point, part them out.
@@ -170,7 +171,7 @@ class MainPage extends React.Component {
       return this.getTabs();
     }
     this.tabs = require("../../test.json");
-    this.loading = false;
+    // this.loading = false;
   };
 
   dispose = () => {
@@ -335,12 +336,13 @@ class MainPage extends React.Component {
           value={this.searchValue}
           debounce={50}
           searchBarPlaceholder={UIText.searchForTabs}
+          searchIconTooltip={UIText.quickSearch}
           onSearchChange={this.handleSearchChange}
           onSearchIconClick={this.handleQuickSearchMenu}
         />
       </IonHeader>
       <IonContent>
-        {!this.loading && (
+        {this.loading ? <FullScreenSpinner name="crescent" /> : (
           this.searchValue ? (
             <IonList className="ion-no-padding">
               {isEmpty(this.filteredTabs) ? (

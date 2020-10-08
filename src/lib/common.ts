@@ -3,7 +3,7 @@ import { UIText } from "../client/lang";
 import { ui } from "../client/ui";
 
 export const matchTabs = (tab: chrome.tabs.Tab, match: string) => {
-  match = match && match.trim();
+  match = match && match.toString().trim();
   const regExp = new RegExp(match, "i");
   return (tab.url && tab.url.match(regExp)) ||
     (tab.title && tab.title.match(regExp)) ||

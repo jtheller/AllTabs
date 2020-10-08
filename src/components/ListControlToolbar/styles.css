@@ -2,3 +2,11 @@
   cursor: pointer;
   pointer-events: all;
 }
+.listControlToolbar ion-searchbar .searchIconTooltipHolder {
+  top: 8px;
+  left: 13px;
+  width: 26px;
+  height: 26px;
+  z-index: 10;
+  cursor: pointer;
+}
