@@ -2,7 +2,7 @@ import { IonSearchbar } from "@ionic/react";
 import React from "react";
 import "./styles.css";
 import { PredefinedColors } from "@ionic/core";
-import { preventDefaultStopProp, whenFulfill } from "../../utils/helpers";
+import { whenFulfill } from "../../utils/helpers";
 import { Tooltip } from "@material-ui/core";
 
 export interface ListControlToolbarProps extends React.HTMLProps<HTMLDivElement> {

@@ -12,7 +12,7 @@ import {
   PickerOptions,
   PopoverOptions,
   toastController,
-  ToastOptions
+  ToastOptions,
 } from "@ionic/core";
 import { responsive } from "../config/styles/responsive";
 import { computed, observable } from "mobx";
@@ -23,7 +23,7 @@ import {
   ShowConfirmOptions,
   UIAlertOptions,
   UIErrorOptions,
-  UIPopoverMenuOptions
+  UIPopoverMenuOptions,
 } from "../lib/types/miscTypes";
 import { Controller } from "../lib/controller";
 import React, { KeyboardEvent } from "react";
