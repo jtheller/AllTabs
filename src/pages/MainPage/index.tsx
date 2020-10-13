@@ -95,6 +95,26 @@ const TabItem = observer(({ tab, focused, onClick, onMouseButton, onContextMenu,
   </div>
 ));
 
+const TabGroupItem = observer(({ group, renderTabs, onWindowClick }) => (
+  <div key={group.id}>
+    <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
+      <IonText>{group.title}</IonText>
+      <Tooltip arrow title={UIText.goToWindow} placement="left">
+        <IonButton
+          className="noHover"
+          fill="clear"
+          title=""
+          size="small"
+          onClick={e => onWindowClick(e, group.id)}
+        >
+          <IonIcon icon={browsersOutline} />
+        </IonButton>
+      </Tooltip>
+    </IonListHeader>
+    {renderTabs(group.tabs)}
+  </div>
+));
+
 const QuickSearchPanel = observer(({ items }) => (
   <div className="flex column">
     <IonText color="primary" className="ion-padding font-xs">{UIText.quickSearch}</IonText>
@@ -171,7 +191,7 @@ class MainPage extends React.Component {
       return this.getTabs();
     }
     this.tabs = require("../../test.json");
-    // this.loading = false;
+    this.loading = false;
   };
 
   dispose = () => {
@@ -308,23 +328,12 @@ class MainPage extends React.Component {
 
   renderTabGroups = groups => <ObserverList
     list={groups}
-    render={group => <>
-      <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
-        <IonText>{group.title}</IonText>
-        <Tooltip arrow title={UIText.goToWindow} placement="left">
-          <IonButton
-            className="noHover"
-            fill="clear"
-            title=""
-            size="small"
-            onClick={e => this.handleWindowClick(e, group.id)}
-          >
-            <IonIcon icon={browsersOutline} />
-          </IonButton>
-        </Tooltip>
-      </IonListHeader>
-      {this.renderTabs(group.tabs)}
-    </>}
+    render={group => <TabGroupItem
+      key={group.id}
+      group={group}
+      renderTabs={this.renderTabs}
+      onWindowClick={this.handleWindowClick}
+    />}
   />;
 
   render() {
