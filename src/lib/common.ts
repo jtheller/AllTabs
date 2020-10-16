@@ -34,6 +34,10 @@ export const getTabMenuItems = (tab: chrome.tabs.Tab): UIPopoverMenuItem[] => [
     handler: () => chrome.windows.create({ url: tab.url, focused: true })
   },
   {
+    text: UIText.moveToNewWindow,
+    handler: () => chrome.windows.create({ tabId: tab.id, focused: true })
+  },
+  {
     text: UIText.openInPrivate,
     handler: () => chrome.windows.create({ url: tab.url, focused: true, incognito: true })
   }

@@ -93,8 +93,13 @@ const general = {
   copyUrl: "Copy URL",
   duplicateTab: "Duplicate tab",
   duplicateInBg: "Duplicate in background",
-  openStandalone: "Open in new window",
+  openStandalone: "Duplicate in new window",
+  moveToNewWindow: "Move to new window",
   openInPrivate: "Open in InPrivate",
+
+  tabsJSON: "Tabs JSON",
+  dumpTabs: "Dump tabs",
+  restoreTabs: "Restore tabs",
 
   windowTitle: (title, length) => `${title}${length > 1 ? ` and ${length - 1} more` : ""}`
 };

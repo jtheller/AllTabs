@@ -15,8 +15,8 @@ import {
   IonRippleEffect,
   IonText,
 } from "@ionic/react";
-import { computed, observable } from "mobx";
-import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp } from "../../utils/helpers";
+import { computed, observable, toJS, when } from "mobx";
+import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp, safeParseJSON } from "../../utils/helpers";
 import { env } from "../../config/env";
 import "./styles.css";
 import ListControlToolbar from "../../components/ListControlToolbar";
@@ -37,7 +37,7 @@ import {
 } from "ionicons/icons";
 import { TabGroup } from "../../lib/types/dataTypes";
 import MdIcon from "../../components/MdIcon";
-import { mdiCollapseAll, mdiExpandAll } from "@mdi/js";
+import { mdiApplicationExport, mdiApplicationImport, mdiCollapseAll, mdiExpandAll } from "@mdi/js";
 import { Controller } from "../../lib/controller";
 import { Tooltip } from "@material-ui/core";
 import { ObserverList } from "../../components/ObserverList";
@@ -206,6 +206,7 @@ class MainPage extends React.Component {
     chrome.windows.getAll({ populate: true }, windows => {
       this.windows = windows;
       this.loading = false;
+      console.log(JSON.stringify(this.tabs));
     });
   });
 
@@ -214,6 +215,42 @@ class MainPage extends React.Component {
     if (!window) return;
     const activeTab = window.tabs.find(t => t.active);
     return UIText.windowTitle(activeTab.title, window.tabs.length);
+  };
+
+  dumpTabs = async () => {
+    await when(() => !this.loading);
+    const data = JSON.stringify(toJS(this.tabs));
+    ui.copyStringToClipboard(data);
+    return console.log(data);
+  };
+
+  restoreTabs = () => {
+    const handler = data => {
+      const { tabsJSON } = data;
+      const tabs = safeParseJSON(tabsJSON);
+      for (const tab of tabs) {
+        chrome.tabs.create({ url: tab.url, selected: false });
+      }
+    };
+    return ui.alert({
+      header: UIText.restoreTabs,
+      inputs: [{
+        name: "tabsJSON",
+        type: "text",
+        placeholder: UIText.tabsJSON
+      }],
+      enterKeyHandler: handler,
+      buttons: [
+        {
+          role: "cancel",
+          text: UIText.generalCancel
+        },
+        {
+          text: UIText.generalConfirm,
+          handler
+        }
+      ]
+    });
   };
 
   handleSearchChange = (event: any) => {
@@ -355,9 +392,11 @@ class MainPage extends React.Component {
           this.searchValue ? (
             <IonList className="ion-no-padding">
               {isEmpty(this.filteredTabs) ? (
-                <div className="flex ion-padding ion-text-center ion-justify-content-center">
-                  <IonText color="medium">深海シティアンダーぐらあああ～～♫</IonText>
-                </div>
+                isEmpty(this.filteredOtherTabGroups) && (
+                  <div className="flex ion-padding ion-text-center ion-justify-content-center">
+                    <IonText color="medium">深海シティアンダーぐらあああ～～♫</IonText>
+                  </div>
+                )
               ) : <>
                 <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
                   <IonText>{UIText.currentWindow}</IonText>
@@ -399,6 +438,24 @@ class MainPage extends React.Component {
             >
               <IonFabButton title="" onClick={() => this.store.showOtherWindows = !this.store.showOtherWindows}>
                 <MdIcon icon={this.showOtherWindows ? mdiCollapseAll : mdiExpandAll} />
+              </IonFabButton>
+            </Tooltip>
+            <Tooltip
+              arrow
+              placement="right"
+              title={UIText.restoreTabs}
+            >
+              <IonFabButton title="" onClick={this.restoreTabs}>
+                <MdIcon icon={mdiApplicationImport} />
+              </IonFabButton>
+            </Tooltip>
+            <Tooltip
+              arrow
+              placement="right"
+              title={UIText.dumpTabs}
+            >
+              <IonFabButton title="" onClick={this.dumpTabs}>
+                <MdIcon icon={mdiApplicationExport} />
               </IonFabButton>
             </Tooltip>
           </IonFabList>
