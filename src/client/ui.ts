@@ -132,7 +132,15 @@ export class UI extends Controller<UIStore> {
 
   popover = (options: Partial<PopoverOptions> & { component: React.FC, event: any }) => {
     if (isEmpty(options)) return;
-    if (options.event && options.event.persist) options.event.persist();
+    const { event } = options;
+    if (event && event.persist) event.persist();
+    if (event.button === 2) {
+      const rect = { ...event.target.getBoundingClientRect() };
+      const { clientX, clientY } = event;
+      rect.bottom = clientY;
+      rect.left = clientX;
+      event.target.getBoundingClientRect = () => rect;
+    }
     const { component } = options;
     if (!!options.component) delete options.component;
     this.popoverProps = { ...options, ...this.withTranslucent };
