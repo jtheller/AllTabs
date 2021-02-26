@@ -11,3 +11,5 @@ export const languages: LanguageType[] = [
     default: true
   }
 ];
+
+export type DefaultDictionary = typeof English_Canada;

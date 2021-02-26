@@ -2,6 +2,7 @@
   "name": "com.jtworks.chrome-ext.alltabs",
   "version": "0.0.1",
   "private": true,
+  "author": "JT-WORKS",
   "dependencies": {
     "@capacitor/android": "^1.5.0",
     "@capacitor/core": "1.4.0",
@@ -59,7 +60,7 @@
       "last 1 safari version"
     ]
   },
-  "description": "An Ionic project",
+  "description": "A Chromium extension to view and manage opened tabs.",
   "devDependencies": {
     "@capacitor/cli": "1.4.0",
     "@types/chrome": "0.0.124",

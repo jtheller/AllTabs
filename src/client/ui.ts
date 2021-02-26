@@ -16,7 +16,14 @@ import {
 } from "@ionic/core";
 import { responsive } from "../config/styles/responsive";
 import { computed, observable } from "mobx";
-import { isEmpty, parseErrorMsg, parseErrorName, preventDefaultStopProp, randomString } from "../utils/helpers";
+import {
+  contextResolve,
+  isEmpty,
+  parseErrorMsg,
+  parseErrorName,
+  preventDefaultStopProp,
+  randomString,
+} from "../utils/helpers";
 import {
   KeyCodeBinding,
   KeyCodeBindingCombos,
@@ -111,6 +118,8 @@ export class UI extends Controller<UIStore> {
     .then(() => this.bindAlertInputEnterKey(input, options.enterKeyHandler, popup))
     .then(() => popup);
   };
+
+  dismissAlert = () => alertController.dismiss().catch(contextResolve);
 
   action = (options: ActionSheetOptions) => {
     if (isEmpty(options)) return;

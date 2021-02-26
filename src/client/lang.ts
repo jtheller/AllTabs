@@ -1,9 +1,12 @@
 import { computed, observable } from "mobx";
-import { languages } from "../config/languages";
+import { DefaultDictionary, languages } from "../config/languages";
 import { Controller } from "../lib/controller";
 import { LanguageType } from "../lib/types/miscTypes";
 import { alertController } from "@ionic/core";
 import { env } from "../config/env";
+
+// Infer type of default language dictionary via interface overload
+interface _UIText extends DefaultDictionary {}
 
 // _UITextStore
 // Persistent storage model for
@@ -98,13 +101,13 @@ class _UIText extends Controller<_UITextStore> {
   }
 }
 
-export const UIText = observable(new _UIText());
+export const UIText: _UIText = observable(new _UIText());
 
 export class UIException implements Error {
-  name: string;
+  name: keyof DefaultDictionary["exceptions"];
   message: string;
   stack: string;
-  constructor(exceptionName, private readonly error?) {
+  constructor(exceptionName: UIException["name"], private readonly error?) {
     this.name = exceptionName;
     this.message = UIText.exceptions[exceptionName] || exceptionName;
     if (error) this.stack = error.stack;

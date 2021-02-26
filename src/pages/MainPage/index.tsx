@@ -219,7 +219,11 @@ class MainPage extends React.Component {
 
   dumpTabs = async () => {
     await when(() => !this.loading);
-    const data = JSON.stringify(toJS(this.tabs));
+    const groups: chrome.tabs.Tab[][] = [this.tabs];
+    for (const group of this.otherTabGroups) {
+      groups.push(group.tabs);
+    }
+    const data = JSON.stringify(toJS(groups));
     ui.copyStringToClipboard(data);
     return console.log(data);
   };
@@ -227,10 +231,10 @@ class MainPage extends React.Component {
   restoreTabs = () => {
     const handler = data => {
       const { tabsJSON } = data;
-      const tabs = safeParseJSON(tabsJSON);
-      for (const tab of tabs) {
-        chrome.tabs.create({ url: tab.url, selected: false });
-      }
+      const groups = safeParseJSON(tabsJSON);
+      groups.forEach(group => {
+        chrome.windows.create({ url: group.map(tab => tab.url ), focused: false })
+      });
     };
     return ui.alert({
       header: UIText.restoreTabs,
