@@ -354,8 +354,8 @@ class MainPage extends React.Component {
 
   renderTabs = (tabs: chrome.tabs.Tab[]) => <ObserverList
     list={tabs}
+    getItemKey={tab => tab.id}
     render={tab => <TabItem
-      key={tab.id}
       tab={tab}
       focused={tab.windowId === this.windowId}
       onClose={e => this.handleClose(e, tab.id)}
@@ -369,8 +369,8 @@ class MainPage extends React.Component {
 
   renderTabGroups = groups => <ObserverList
     list={groups}
+    getItemKey={group => group.id}
     render={group => <TabGroupItem
-      key={group.id}
       group={group}
       renderTabs={this.renderTabs}
       onWindowClick={this.handleWindowClick}
