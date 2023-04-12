@@ -229,6 +229,7 @@ ion-item > .readonlyIconStyle {
 }
 .mainPage .tabItem.active.focused {
   box-shadow: inset 0 0 7px -1px #cfcfcf;
+  background-color: #fcfcfc;
 }
 .mainPage .tabItem .favicon {
   width: 18px;

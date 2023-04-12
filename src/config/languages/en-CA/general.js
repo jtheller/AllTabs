@@ -87,6 +87,8 @@ const general = {
 
   showAllWindows: "Show all windows",
   showCurrentWindows: "Show only this window",
+  showActive: "Show current tabs",
+  showStored: "Show stored tabs",
   goToWindow: "Switch to this window",
 
   copyTitle: "Copy page title",
@@ -95,11 +97,17 @@ const general = {
   duplicateInBg: "Duplicate in background",
   openStandalone: "Duplicate in new window",
   moveToNewWindow: "Move to new window",
+  reopenTab: "Re-open tab",
+  reopenWindow: "Restore window",
+  openInNewWindow: "Open in new window",
   openInPrivate: "Open in InPrivate",
 
   tabsJSON: "Tabs JSON",
   dumpTabs: "Dump tabs",
   restoreTabs: "Restore tabs",
+  restoreToStore: "Restore to storage only",
+
+  sortDirection: "Sort direction",
 
   windowTitle: (title, length) => `${title}${length > 1 ? ` and ${length - 1} more` : ""}`
 };

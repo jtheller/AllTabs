@@ -12,7 +12,7 @@ export const matchTabs = (tab: chrome.tabs.Tab, match: string) => {
     (tab.active && "active".match(regExp));
 };
 
-export const getTabMenuItems = (tab: chrome.tabs.Tab): UIPopoverMenuItem[] => [
+export const getTabMenuItems = (tab: chrome.tabs.Tab, isStored?: boolean): UIPopoverMenuItem[] => [
   {
     text: UIText.copyTitle,
     handler: () => ui.copyStringToClipboard(tab.title, true)
@@ -21,27 +21,35 @@ export const getTabMenuItems = (tab: chrome.tabs.Tab): UIPopoverMenuItem[] => [
     text: UIText.copyUrl,
     handler: () => ui.copyStringToClipboard(tab.url, true)
   },
-  {
+  !isStored && {
     text: UIText.duplicateTab,
-    handler: () => chrome.tabs.create({ url: tab.url, selected: true })
+    handler: () => chrome.tabs.create({ url: tab.url, active: true })
   },
-  {
+  !isStored && {
     text: UIText.duplicateInBg,
-    handler: () => chrome.tabs.create({ url: tab.url, selected: false })
+    handler: () => chrome.tabs.create({ url: tab.url, active: false })
   },
-  {
+  !isStored && {
     text: UIText.openStandalone,
     handler: () => chrome.windows.create({ url: tab.url, focused: true })
   },
-  {
+  !isStored && {
     text: UIText.moveToNewWindow,
     handler: () => chrome.windows.create({ tabId: tab.id, focused: true })
+  },
+  isStored && {
+    text: UIText.reopenTab,
+    handler: () => chrome.tabs.create({ url: tab.url, active: true })
+  },
+  isStored && {
+    text: UIText.openInNewWindow,
+    handler: () => chrome.windows.create({ url: tab.url, focused: true })
   },
   {
     text: UIText.openInPrivate,
     handler: () => chrome.windows.create({ url: tab.url, focused: true, incognito: true })
   }
-];
+].filter(Boolean);
 
 export const getQuickSearchItems = () => ([
   "Audible", "Muted", "Active"
