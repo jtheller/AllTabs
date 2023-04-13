@@ -54,3 +54,13 @@ export const getTabMenuItems = (tab: chrome.tabs.Tab, isStored?: boolean): UIPop
 export const getQuickSearchItems = () => ([
   "Audible", "Muted", "Active"
 ]);
+
+export const dirSort = (asc: boolean, prop: string) => (a, b) => (
+  a[prop] > b[prop]
+    ? asc
+    ? 1
+    : -1
+    : asc
+    ? -1
+    : 1
+);

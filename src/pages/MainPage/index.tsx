@@ -23,7 +23,7 @@ import ListControlToolbar from "../../components/ListControlToolbar";
 import { observer } from "mobx-react";
 import { defaultFavIconUrl } from "../../config/constants";
 import { UIText } from "../../client/lang";
-import { getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
+import { dirSort, getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
 import { ui } from "../../client/ui";
 import {
   browsersOutline,
@@ -53,10 +53,11 @@ import FullScreenSpinner from "../../components/FullScreenSpinner";
 import { computedFn } from "mobx-utils";
 
 // TODO: When components grow to a point, part them out.
-const TabItem = observer(({ tab, isStored, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
+const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
   <div
     key={tab.id}
-    className={`flex relative ion-activatable ion-align-items-center tabItem ${!isStored && tab.active ? "active" : ""} ${focused ? "focused" : ""}`}
+    className={`flex relative ion-activatable ion-align-items-center tabItem ${
+      !isStored && tab.active ? "active" : ""} ${isStoredExisting ? "exist" : ""} ${focused ? "focused" : ""}`}
     onClick={onClick}
     onContextMenu={onContextMenu}
     onMouseDown={onMouseButton}
@@ -145,6 +146,10 @@ interface MainStore {
 
 @observer
 class MainPage extends React.Component {
+  controller = new Controller<MainStore>("mainPage");
+
+  @computed get store() { return this.controller.store };
+
   @observable windowId: number;
   @observable windowTitle: string;
   @observable tabs: chrome.tabs.Tab[] = [];
@@ -155,9 +160,6 @@ class MainPage extends React.Component {
 
   @observable loading: boolean = true;
   @observable fabOpen: boolean = false;
-
-  controller = new Controller<MainStore>("mainPage");
-  @computed get store() { return this.controller.store };
 
   @computed get otherTabs(): MainPage["tabs"] {
     return arrayFlat(this.windows.map(w => w.tabs));
@@ -191,15 +193,7 @@ class MainPage extends React.Component {
   };
   @computed get sortedOtherTabGroups(): TabGroup[] {
     const tabGroups = toJS(this.filteredOtherTabGroups);
-    return tabGroups.sort((a, b) => (
-      a.id > b.id
-        ? this.sortAsc
-        ? 1
-        : -1
-        : this.sortAsc
-        ? -1
-        : 1
-    ));
+    return tabGroups.sort(dirSort(this.sortAsc, "id"));
   };
   @computed get allTabs(): MainPage["tabs"] {
     return [].concat(this.tabs, this.otherTabs);
@@ -223,15 +217,7 @@ class MainPage extends React.Component {
   };
   @computed get sortedStoredTabGroups(): TabGroup[] {
     const tabGroups = toJS(this.filteredStoredTabGroups);
-    return tabGroups.sort((a, b) => (
-      a.id > b.id
-        ? this.sortAsc
-        ? 1
-        : -1
-        : this.sortAsc
-        ? -1
-        : 1
-    ));
+    return tabGroups.sort(dirSort(this.sortAsc, "id"));
   };
 
   constructor(props) {
@@ -286,6 +272,8 @@ class MainPage extends React.Component {
     return [tabGroup, tab];
   });
 
+  findExistingTab = computedFn((tab: chrome.tabs.Tab) => this.allTabs.find(t => t.url === tab.url));
+
   dumpTabs = async () => {
     await when(() => !this.loading);
     // const groups: chrome.tabs.Tab[][] = [this.tabs];
@@ -338,6 +326,12 @@ class MainPage extends React.Component {
     const [tabGroup, _tab] = this.findStoredTabAndGroup(tabId);
     if (!tabGroup) return;
     const isMiddleClick = event.button && event.button === 1;
+    const shouldOpenBackground = event.ctrlKey || isMiddleClick;
+    const existingTab = this.findExistingTab(_tab);
+    if (existingTab && !shouldOpenBackground) {
+      if (existingTab.windowId) chrome.windows.update(existingTab.windowId, { focused: true });
+      return chrome.tabs.update(existingTab.id, { active: true });
+    }
     return chrome.tabs.create({ url: _tab.url, active: !event.ctrlKey && !isMiddleClick });
   };
 
@@ -474,6 +468,7 @@ class MainPage extends React.Component {
     render={tab => <TabItem
       tab={tab}
       isStored={this.showStored}
+      isStoredExisting={this.showStored && !!this.findExistingTab(tab)}
       focused={!this.showStored && tab.windowId === this.windowId}
       onClose={e => this.handleClose(e, tab.id)}
       onRefresh={e => this.handleRefresh(e, tab.id)}
