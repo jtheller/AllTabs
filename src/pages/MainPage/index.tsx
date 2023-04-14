@@ -15,7 +15,7 @@ import {
   IonRippleEffect,
   IonText,
 } from "@ionic/react";
-import { computed, IObservableArray, observable, toJS, when } from "mobx";
+import { computed, IObservableArray, observable, reaction, toJS, when } from "mobx";
 import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp, safeParseJSON } from "../../utils/helpers";
 import { env } from "../../config/env";
 import "./styles.css";
@@ -26,6 +26,7 @@ import { UIText } from "../../client/lang";
 import { dirSort, getQuickSearchItems, getTabMenuItems, matchTabs } from "../../lib/common";
 import { ui } from "../../client/ui";
 import {
+  archiveOutline,
   browsersOutline,
   closeSharp,
   ellipsisVertical, openOutline,
@@ -51,6 +52,7 @@ import { Tooltip } from "@material-ui/core";
 import { ObserverList } from "../../components/ObserverList";
 import FullScreenSpinner from "../../components/FullScreenSpinner";
 import { computedFn } from "mobx-utils";
+import { PredefinedColors } from "@ionic/core";
 
 // TODO: When components grow to a point, part them out.
 const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
@@ -108,12 +110,26 @@ const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, o
   </div>
 ));
 
-const TabGroupItem = observer(({ isStored, group, renderTabs, onWindowClick }) => (
+const TabGroupItem = observer(({ isStored, group, renderTabs, onStoreClick, onWindowClick }) => (
   <div key={group.id}>
     <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
       <IonText>{group.title}</IonText>
+      {!isStored && (
+        <Tooltip arrow title={UIText.storeWindow} placement="left">
+          <IonButton
+            className="noHover"
+            fill="clear"
+            title=""
+            size="small"
+            onClick={e => onStoreClick(e, group.id)}
+          >
+            <IonIcon icon={archiveOutline} />
+          </IonButton>
+        </Tooltip>
+      )}
       <Tooltip arrow title={isStored ? UIText.reopenWindow : UIText.goToWindow} placement="left">
         <IonButton
+          color={isStored ? "tooling" : "primary"}
           className="noHover"
           fill="clear"
           title=""
@@ -126,6 +142,25 @@ const TabGroupItem = observer(({ isStored, group, renderTabs, onWindowClick }) =
     </IonListHeader>
     {renderTabs(group.tabs)}
   </div>
+));
+
+const CurrentWindowHeader = observer(({ isStored, onStoreClick }) => (
+  <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
+    <IonText>{UIText.currentWindow}</IonText>
+    {!isStored && (
+      <Tooltip arrow title={UIText.storeWindow} placement="left">
+        <IonButton
+          className="noHover"
+          fill="clear"
+          title=""
+          size="small"
+          onClick={onStoreClick}
+        >
+          <IonIcon icon={archiveOutline} />
+        </IonButton>
+      </Tooltip>
+    )}
+  </IonListHeader>
 ));
 
 const QuickSearchPanel = observer(({ items }) => (
@@ -141,7 +176,10 @@ interface MainStore {
   showOtherWindows: boolean;
   storedTabGroups: TabGroup[];
   showStored: boolean;
-  sortAsc: boolean;
+  sortAsc: {
+    stored: boolean;
+    current: boolean;
+  };
 }
 
 @observer
@@ -206,7 +244,8 @@ class MainPage extends React.Component {
     return this.store.showStored;
   };
   @computed get sortAsc(): boolean {
-    return this.store.sortAsc;
+    this.controller.storage.initProperty("sortAsc", { current: false, stored: false });
+    return this.store.sortAsc[this.showStored ? "stored" : "current"];
   };
   @computed get storedTabGroups(): IObservableArray<TabGroup> {
     this.controller.storage.initProperty("storedTabGroups", []);
@@ -223,6 +262,9 @@ class MainPage extends React.Component {
   constructor(props) {
     super(props);
     setTimeout(this.initialize, 100);
+    this.controller.disposer = reaction(() => this.showStored, () => {
+      if (!this.showStored) this.getTabs();
+    });
   }
 
   componentWillUnmount(): void {
@@ -245,6 +287,7 @@ class MainPage extends React.Component {
     chrome.tabs.onUpdated.removeListener(this.getTabs);
     chrome.tabs.onRemoved.removeListener(this.getTabs);
     chrome.tabs.onCreated.removeListener(this.getTabs);
+    this.controller.dispose();
   };
 
   getTabs = () => chrome.windows.getCurrent({ populate: true }, window => {
@@ -254,16 +297,16 @@ class MainPage extends React.Component {
     chrome.windows.getAll({ populate: true }, windows => {
       this.windows = windows;
       this.loading = false;
-      console.log(JSON.stringify(this.tabs));
     });
   });
 
-  getWindowTitle = (window: chrome.windows.Window) => {
+  getWindowTitle = computedFn((window: chrome.windows.Window) => {
     if (env !== "prod") return;
     if (!window) return;
     const activeTab = window.tabs.find(t => t.active);
+    if (!activeTab) return;
     return UIText.windowTitle(activeTab.title, window.tabs.length);
-  };
+  });
 
   findStoredTabAndGroup = computedFn((tabId: number): [TabGroup, chrome.tabs.Tab] => {
     const tabGroup: TabGroup = this.storedTabGroups.find(tg => tg.tabs.some(t => t.id === tabId));
@@ -400,16 +443,58 @@ class MainPage extends React.Component {
       if (!tabGroup) return;
       const tab = (tabGroup.tabs || [])[0];
       if (!tab) return;
-      chrome.windows.create({ url: tab.url, focused: false }, window => {
-        const remainingTabs = toJS(tabGroup.tabs);
-        remainingTabs.shift();
-        remainingTabs.forEach(t => chrome.tabs.create({ windowId: window.id, url: t.url }));
-      });
+      const existingTabGroup = [
+        this.currentTabGroup,
+        ...this.otherTabGroups
+      ].find(tg => tg.tabs.every(tab => tabGroup.tabs.some(t => t.url === tab.url)));
+      if (existingTabGroup) {
+        chrome.windows.update(existingTabGroup.id, { focused: true });
+      } else {
+        chrome.windows.create({ url: tab.url, focused: false }, window => {
+          const remainingTabs = toJS(tabGroup.tabs);
+          remainingTabs.shift();
+          remainingTabs.forEach(t => chrome.tabs.create({ windowId: window.id, url: t.url }));
+        });
+      }
     }
     if (env !== "prod") return;
     const window = this.windows.find(w => w.id === id);
     if (!window) return;
     return chrome.windows.update(id, { focused: true });
+  };
+
+  handleWindowStore = (event: any, id: number) => {
+    preventDefaultStopProp(event);
+    if (this.showStored) return;
+    if (env !== "prod") return;
+    const window = this.windows.find(w => w.id === id);
+    if (!window) return;
+    const tabGroup = this.otherTabGroups.find(tg => tg.id === window.id);
+    if (!tabGroup) return;
+    const existingStored = this.storedTabGroups.find(tg => (
+      tg.id === tabGroup.id || tg.tabs.every(tab => tabGroup.tabs.some(t => t.url === tab.url))
+    ));
+    if (existingStored) {
+      Object.assign(existingStored, toJS(tabGroup));
+    } else {
+      this.store.storedTabGroups.push(toJS(tabGroup));
+    }
+    setTimeout(() => this.store.showStored = true);
+  };
+
+  handleCurrentWindowStore = (event: any) => {
+    preventDefaultStopProp(event);
+    if (this.showStored) return;
+    if (env !== "prod") return;
+    const existingStored = this.storedTabGroups.find(tg => (
+      tg.id === this.currentTabGroup.id || tg.tabs.every(tab => this.currentTabGroup.tabs.some(t => t.url === tab.url))
+    ));
+    if (existingStored) {
+      Object.assign(existingStored, toJS(this.currentTabGroup));
+    } else {
+      this.store.storedTabGroups.push(toJS(this.currentTabGroup));
+    }
+    setTimeout(() => this.store.showStored = true);
   };
 
   handleMenu = (event: any, id: number) => {
@@ -462,6 +547,8 @@ class MainPage extends React.Component {
     return chrome.tabs.update(tab.id, { muted: !tab.mutedInfo.muted });
   };
 
+  toggleSort = () => this.store.sortAsc[this.showStored ? "stored" : "current"] = !this.sortAsc;
+
   renderTabs = (tabs: chrome.tabs.Tab[]) => <ObserverList
     list={tabs}
     getItemKey={tab => tab.id}
@@ -486,6 +573,7 @@ class MainPage extends React.Component {
       isStored={this.showStored}
       group={group}
       renderTabs={this.renderTabs}
+      onStoreClick={this.handleWindowStore}
       onWindowClick={this.handleWindowClick}
     />}
   />;
@@ -498,9 +586,7 @@ class MainPage extends React.Component {
         </div>
       )
     ) : <>
-      <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
-        <IonText>{UIText.currentWindow}</IonText>
-      </IonListHeader>
+      <CurrentWindowHeader isStored={this.showStored} onStoreClick={this.handleCurrentWindowStore}/>
       {this.renderTabs(this.filteredTabs)}
     </>;
 
@@ -508,7 +594,7 @@ class MainPage extends React.Component {
       <IonHeader translucent>
         <ListControlToolbar
           className="searchTool"
-          color="primary"
+          color={this.showStored ? "tooling" as PredefinedColors : "primary"}
           value={this.searchValue}
           debounce={50}
           searchBarPlaceholder={UIText.searchForTabs}
@@ -532,16 +618,12 @@ class MainPage extends React.Component {
           ) : this.showOtherWindows ? (
             <IonList className="ion-no-padding">
               {this.sortAsc && <>
-                <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
-                  <IonText>{UIText.currentWindow}</IonText>
-                </IonListHeader>
+                <CurrentWindowHeader isStored={this.showStored} onStoreClick={this.handleCurrentWindowStore}/>
                 {this.renderTabs(this.tabs)}
               </>}
               {this.renderTabGroups(this.sortedOtherTabGroups)}
               {!this.sortAsc && <>
-                <IonListHeader color="light" className="windowTitle font-xs textBold textDarkMedium" lines="full">
-                  <IonText>{UIText.currentWindow}</IonText>
-                </IonListHeader>
+                <CurrentWindowHeader isStored={this.showStored} onStoreClick={this.handleCurrentWindowStore}/>
                 {this.renderTabs(this.tabs)}
               </>}
             </IonList>
@@ -560,7 +642,7 @@ class MainPage extends React.Component {
           slot="fixed"
         >
           <IonFabButton
-            color={this.showStored ? "warning" : "primary"}
+            color={this.showStored ? "tooling" : "primary"}
             onClick={() => this.fabOpen = !this.fabOpen}
           >
             <IonIcon icon={optionsOutline} />
@@ -609,7 +691,7 @@ class MainPage extends React.Component {
               placement="right"
               title={UIText.sortDirection}
             >
-              <IonFabButton title="" onClick={() => this.store.sortAsc = !this.store.sortAsc}>
+              <IonFabButton title="" onClick={this.toggleSort}>
                 <MdIcon icon={this.sortAsc ? mdiArrowCollapseUp : mdiArrowCollapseDown} />
               </IonFabButton>
             </Tooltip>

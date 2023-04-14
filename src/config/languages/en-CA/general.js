@@ -99,6 +99,7 @@ const general = {
   moveToNewWindow: "Move to new window",
   reopenTab: "Re-open tab",
   reopenWindow: "Restore window",
+  storeWindow: "Archive window tabs to storage",
   openInNewWindow: "Open in new window",
   openInPrivate: "Open in InPrivate",
 
