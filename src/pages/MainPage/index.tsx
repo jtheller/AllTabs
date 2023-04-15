@@ -8,10 +8,12 @@ import {
   IonFabButton,
   IonFabList,
   IonHeader,
-  IonIcon, IonItem,
+  IonIcon,
   IonList,
   IonListHeader,
-  IonPage, IonReorder, IonReorderGroup,
+  IonPage,
+  IonReorder,
+  IonReorderGroup,
   IonRippleEffect,
   IonText,
 } from "@ionic/react";
@@ -36,7 +38,8 @@ import {
   archiveOutline,
   browsersOutline,
   closeSharp,
-  ellipsisVertical, openOutline,
+  ellipsisVertical,
+  openOutline,
   optionsOutline,
   refreshSharp,
   volumeHighOutline,
@@ -48,7 +51,8 @@ import MdIcon from "../../components/MdIcon";
 import {
   mdiApplicationExport,
   mdiApplicationImport,
-  mdiArchive, mdiArrowCollapseDown,
+  mdiArchive,
+  mdiArrowCollapseDown,
   mdiArrowCollapseUp,
   mdiCollapseAll,
   mdiExpandAll,
@@ -59,7 +63,7 @@ import { Tooltip } from "@material-ui/core";
 import { ObserverList } from "../../components/ObserverList";
 import FullScreenSpinner from "../../components/FullScreenSpinner";
 import { computedFn } from "mobx-utils";
-import { PredefinedColors, ItemReorderEventDetail } from "@ionic/core";
+import { ItemReorderEventDetail, PredefinedColors } from "@ionic/core";
 
 // TODO: When components grow to a point, part them out.
 const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
@@ -507,7 +511,6 @@ class MainPage extends React.Component {
   };
 
   handleMenu = (event: any, id: number) => {
-    preventDefaultStopProp(event);
     let tab: chrome.tabs.Tab;
     if (this.showStored) {
       const [tabGroup, _tab] = this.findStoredTabAndGroup(id);
@@ -715,15 +718,17 @@ class MainPage extends React.Component {
                 <MdIcon icon={mdiApplicationExport} />
               </IonFabButton>
             </Tooltip>
-            <Tooltip
-              arrow
-              placement="right"
-              title={UIText.sortDirection}
-            >
-              <IonFabButton title="" onClick={this.toggleSort}>
-                <MdIcon icon={this.sortAsc ? mdiArrowCollapseUp : mdiArrowCollapseDown} />
-              </IonFabButton>
-            </Tooltip>
+            {(this.showOtherWindows || this.showStored) && (
+              <Tooltip
+                arrow
+                placement="right"
+                title={UIText.sortDirection}
+              >
+                <IonFabButton title="" onClick={this.toggleSort}>
+                  <MdIcon icon={this.sortAsc ? mdiArrowCollapseUp : mdiArrowCollapseDown} />
+                </IonFabButton>
+              </Tooltip>
+            )}
           </IonFabList>
         </IonFab>
       </IonContent>
