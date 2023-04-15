@@ -8,15 +8,22 @@ import {
   IonFabButton,
   IonFabList,
   IonHeader,
-  IonIcon,
+  IonIcon, IonItem,
   IonList,
   IonListHeader,
-  IonPage,
+  IonPage, IonReorder, IonReorderGroup,
   IonRippleEffect,
   IonText,
 } from "@ionic/react";
 import { computed, IObservableArray, observable, reaction, toJS, when } from "mobx";
-import { arrayFlat, getEventRealValue, isEmpty, preventDefaultStopProp, safeParseJSON } from "../../utils/helpers";
+import {
+  arrayFlat,
+  getEventRealValue,
+  isEmpty,
+  isNonZeroFalse,
+  preventDefaultStopProp,
+  safeParseJSON,
+} from "../../utils/helpers";
 import { env } from "../../config/env";
 import "./styles.css";
 import ListControlToolbar from "../../components/ListControlToolbar";
@@ -52,7 +59,7 @@ import { Tooltip } from "@material-ui/core";
 import { ObserverList } from "../../components/ObserverList";
 import FullScreenSpinner from "../../components/FullScreenSpinner";
 import { computedFn } from "mobx-utils";
-import { PredefinedColors } from "@ionic/core";
+import { PredefinedColors, ItemReorderEventDetail } from "@ionic/core";
 
 // TODO: When components grow to a point, part them out.
 const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, onMouseButton, onContextMenu, onClose, onMute, onRefresh }) => (
@@ -64,12 +71,14 @@ const TabItem = observer(({ tab, isStored, isStoredExisting, focused, onClick, o
     onContextMenu={onContextMenu}
     onMouseDown={onMouseButton}
   >
-    <img
-      className="favicon"
-      src={tab.favIconUrl || defaultFavIconUrl}
-      alt=""
-      onError={e => e.currentTarget.src = defaultFavIconUrl}
-    />
+    <IonReorder className="flex ion-align-items-center ion-justify-content-center">
+      <img
+        className="favicon"
+        src={tab.favIconUrl || defaultFavIconUrl}
+        alt=""
+        onError={e => e.currentTarget.src = defaultFavIconUrl}
+      />
+    </IonReorder>
     <IonText className="flex column font-xxs contentText">
       <span className="title textBold">{tab.title}</span>
       <span className="url">{tab.url}</span>
@@ -290,7 +299,7 @@ class MainPage extends React.Component {
     this.controller.dispose();
   };
 
-  getTabs = () => chrome.windows.getCurrent({ populate: true }, window => {
+  getTabs = () => env === "prod" && chrome.windows.getCurrent({ populate: true }, window => {
     this.windowId = window.id;
     this.windowTitle = this.getWindowTitle(window);
     this.tabs = window.tabs || [];
@@ -547,24 +556,44 @@ class MainPage extends React.Component {
     return chrome.tabs.update(tab.id, { muted: !tab.mutedInfo.muted });
   };
 
+  handleReorder = (windowId: number) => (event: CustomEvent<ItemReorderEventDetail>) => {
+    const { from, to, complete } = event.detail;
+    if (isNonZeroFalse(to) || isNonZeroFalse(from)) return;
+    if (this.showStored) {
+      const storedTabGroup = this.storedTabGroups.find(tg => tg.id === windowId);
+      if (isEmpty(storedTabGroup)) return;
+      return complete(storedTabGroup.tabs);
+    } else {
+      const tabGroup = this.currentTabGroup.id === windowId ? this.currentTabGroup : this.otherTabGroups.find(tg => tg.id === windowId);
+      if (isEmpty(tabGroup)) return;
+      const tabToMove = tabGroup.tabs[from];
+      if (!tabToMove) return;
+      if (env === "prod") chrome.tabs.move(tabToMove.id, { index: to });
+      complete();
+      return this.getTabs();
+    }
+  };
+
   toggleSort = () => this.store.sortAsc[this.showStored ? "stored" : "current"] = !this.sortAsc;
 
-  renderTabs = (tabs: chrome.tabs.Tab[]) => <ObserverList
-    list={tabs}
-    getItemKey={tab => tab.id}
-    render={tab => <TabItem
-      tab={tab}
-      isStored={this.showStored}
-      isStoredExisting={this.showStored && !!this.findExistingTab(tab)}
-      focused={!this.showStored && tab.windowId === this.windowId}
-      onClose={e => this.handleClose(e, tab.id)}
-      onRefresh={e => this.handleRefresh(e, tab.id)}
-      onMute={e => this.handleMute(e, tab.id)}
-      onClick={e => this.handleTabClick(e, tab.id)}
-      onMouseButton={e => this.handleMouseButton(e, tab.id)}
-      onContextMenu={e => this.handleMenu(e, tab.id)}
-    />}
-  />;
+  renderTabs = (tabs: chrome.tabs.Tab[]) => <IonReorderGroup disabled={false} onIonItemReorder={this.handleReorder(tabs[0].windowId)}>
+    <ObserverList
+      list={tabs}
+      getItemKey={tab => tab.id}
+      render={tab => <TabItem
+        tab={tab}
+        isStored={this.showStored}
+        isStoredExisting={this.showStored && !!this.findExistingTab(tab)}
+        focused={!this.showStored && tab.windowId === this.windowId}
+        onClose={e => this.handleClose(e, tab.id)}
+        onRefresh={e => this.handleRefresh(e, tab.id)}
+        onMute={e => this.handleMute(e, tab.id)}
+        onClick={e => this.handleTabClick(e, tab.id)}
+        onMouseButton={e => this.handleMouseButton(e, tab.id)}
+        onContextMenu={e => this.handleMenu(e, tab.id)}
+      />}
+    />
+  </IonReorderGroup>;
 
   renderTabGroups = groups => <ObserverList
     list={groups}

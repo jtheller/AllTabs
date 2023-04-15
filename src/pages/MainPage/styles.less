@@ -26,11 +26,19 @@
       }
     }
 
-    .favicon {
-      width: 18px;
-      height: 18px;
-      margin-right: 10px;
+    @faviconSize: 20px;
+    ion-reorder {
+      margin-right: unset;
+      margin-inline-end: var(--ion-margin, 10px);
+      height: 100%;
+      min-width: @faviconSize;
     }
+
+    .favicon {
+      width: @faviconSize;
+      height: @faviconSize;
+    }
+
     .contentText {
       width: 100%;
       overflow: hidden;
