@@ -1,0 +1,2 @@
+/*! For license information please see 55.faa9b515.chunk.js.LICENSE.txt */
+(this["webpackJsonpcom.jtworks.chrome-ext.alltabs"]=this["webpackJsonpcom.jtworks.chrome-ext.alltabs"]||[]).push([[55],{93:function(t,o,r){"use strict";r.r(o),r.d(o,"i",(function(){return e}));var e=function isRTL(t){return t&&""!==t.dir?"rtl"===t.dir.toLowerCase():"rtl"===(null===document||void 0===document?void 0:document.dir.toLowerCase())}}}]);
