@@ -1,29 +1,10 @@
 import { UIText } from "./lang";
 import { env } from "../config/env";
 import { Plugins } from "@capacitor/core";
-import {
-  actionSheetController,
-  ActionSheetOptions,
-  alertController,
-  AlertInput,
-  modalController,
-  ModalOptions,
-  pickerController,
-  PickerOptions,
-  PopoverOptions,
-  toastController,
-  ToastOptions,
-} from "@ionic/core";
+import { AlertInput, PopoverOptions, ToastOptions, TriggerAction } from "@ionic/core";
 import { responsive } from "../config/styles/responsive";
 import { computed, observable } from "mobx";
-import {
-  contextResolve,
-  isEmpty,
-  parseErrorMsg,
-  parseErrorName,
-  preventDefaultStopProp,
-  randomString,
-} from "../utils/helpers";
+import { isEmpty, parseErrorMsg, parseErrorName, preventDefaultStopProp, randomString } from "../utils/helpers";
 import {
   KeyCodeBinding,
   KeyCodeBindingCombos,
@@ -35,6 +16,7 @@ import {
 import { Controller } from "../lib/controller";
 import React, { KeyboardEvent } from "react";
 import { PopoverMenuBase } from "../components/PopoverMenuBase";
+import { UseIonAlertResult, UseIonToastResult } from "@ionic/react";
 
 const { Clipboard } = Plugins;
 
@@ -46,6 +28,12 @@ interface UIStore {}
 // Front-end UI controller class for
 // various reusable methods and cross-component state store.
 export class UI extends Controller<UIStore> {
+  showAlert: UseIonAlertResult[0];
+  dismissAlert: UseIonAlertResult[1];
+
+  showToast: UseIonToastResult[0];
+  dismissToast: UseIonToastResult[1];
+
   placeholderAvatarUrl = "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y";
 
   withTranslucent = {
@@ -55,12 +43,22 @@ export class UI extends Controller<UIStore> {
   defaultDuration: number = 500;
   defaultToastDuration: number = 1500;
 
-  @observable popoverProps: PopoverOptions;
+  @observable popoverProps: PopoverOptions & { triggerAction?: TriggerAction };
   @observable popoverComponent: React.FC;
   @observable popoverVisible: boolean = false;
 
   @computed get isMobile(): boolean {
     return responsive.deviceDimension.isMobile
+  };
+
+  setAlertController = (hook: UseIonAlertResult) => {
+    this.showAlert = hook[0];
+    this.dismissAlert = hook[1];
+  };
+
+  setToastController = (hook: UseIonToastResult) => {
+    this.showToast = hook[0];
+    this.dismissToast = hook[1];
   };
 
   copyStringToClipboard = (value: string, noToast?: boolean) => {
@@ -95,13 +93,12 @@ export class UI extends Controller<UIStore> {
 
   toast = (options: ToastOptions) => {
     if (isEmpty(options)) return;
-    return toastController.create({
+    return this.showToast({
       duration: this.defaultToastDuration,
       ...options,
       ...this.withTranslucent,
       position: options.position || (this.isMobile ? "bottom" : "top")
-    })
-    .then(toast => toast.present() && toast);
+    });
   };
 
   alert = (options: UIAlertOptions) => {
@@ -112,44 +109,14 @@ export class UI extends Controller<UIStore> {
       input = options.inputs[options.inputs.length -1];
       input.id = "ionAlertInput" + randomString();
     }
-    let popup;
-    return alertController.create({ ...options, ...this.withTranslucent })
-    .then(p => p.present() && (popup = p))
-    .then(() => this.bindAlertInputEnterKey(input, options.enterKeyHandler, popup))
-    .then(() => popup);
+    return this.showAlert({ ...options, ...this.withTranslucent })
+    .then(() => this.bindAlertInputEnterKey(input, options.enterKeyHandler));
   };
 
-  dismissAlert = () => alertController.dismiss().catch(contextResolve);
-
-  action = (options: ActionSheetOptions) => {
-    if (isEmpty(options)) return;
-    return actionSheetController.create({ ...options, ...this.withTranslucent })
-    .then(actionSheet => actionSheet.present() && actionSheet);
-  };
-
-  modal = (options: ModalOptions) => {
-    if (isEmpty(options)) return;
-    return modalController.create({ ...options, ...this.withTranslucent })
-    .then(modal => modal.present() && modal);
-  };
-
-  rollerPicker = (options: PickerOptions) => {
-    if (isEmpty(options)) return;
-    return pickerController.create({ ...options, ...this.withTranslucent })
-    .then(picker => picker.present() && picker);
-  };
-
-  popover = (options: Partial<PopoverOptions> & { component: React.FC, event: any }) => {
+  popover = (options: Partial<UI["popoverProps"]> & { component: React.FC, event: any }) => {
     if (isEmpty(options)) return;
     const { event } = options;
     if (event && event.persist) event.persist();
-    if (event.button === 2) {
-      const rect = { ...event.target.getBoundingClientRect() };
-      const { clientX, clientY } = event;
-      rect.bottom = clientY;
-      rect.left = clientX;
-      event.target.getBoundingClientRect = () => rect;
-    }
     const { component } = options;
     if (!!options.component) delete options.component;
     this.popoverProps = { ...options, ...this.withTranslucent };
@@ -162,7 +129,8 @@ export class UI extends Controller<UIStore> {
     return this.popover({
       event: options.event,
       component,
-      showBackdrop: options.showBackdrop
+      showBackdrop: options.showBackdrop,
+      triggerAction: options.triggerAction
     });
   };
 
@@ -223,7 +191,7 @@ export class UI extends Controller<UIStore> {
     return { [eventType]: handler };
   };
 
-  bindAlertInputEnterKey = (input: AlertInput, handler: UIAlertOptions["enterKeyHandler"], alert) => {
+  bindAlertInputEnterKey = (input: AlertInput, handler: UIAlertOptions["enterKeyHandler"]) => {
     if (!input) return;
     const elm = (window as any).document.getElementById(input.id);
     if (elm) {
@@ -231,7 +199,7 @@ export class UI extends Controller<UIStore> {
         const { keyCode } = event;
         if (keyCode !== 13) return;
         handler({ [input.name]: elm.value });
-        return alert.dismiss();
+        return this.dismissAlert && this.dismissAlert();
       };
     }
   };

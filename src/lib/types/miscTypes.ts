@@ -1,4 +1,4 @@
-import { AlertButton, AlertOptions, PredefinedColors } from "@ionic/core";
+import { AlertButton, AlertOptions, PredefinedColors, TriggerAction } from "@ionic/core";
 import { KeyboardEvent, ReactNode } from "react";
 import { AxiosError, AxiosRequestConfig } from "axios";
 
@@ -45,6 +45,7 @@ export interface UIPopoverMenuOptions {
   event: any;
   menuItems: UIPopoverMenuItem[];
   showBackdrop?: boolean;
+  triggerAction?: TriggerAction;
 }
 
 export interface ApiOptions extends AxiosRequestConfig {

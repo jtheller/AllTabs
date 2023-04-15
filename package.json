@@ -6,8 +6,8 @@
   "dependencies": {
     "@capacitor/android": "^1.5.0",
     "@capacitor/core": "1.4.0",
-    "@ionic/react": "^5.3.5",
-    "@ionic/react-router": "^5.3.5",
+    "@ionic/react": "^6.7.3",
+    "@ionic/react-router": "^6.7.3",
     "@material-ui/core": "^4.11.0",
     "@mdi/js": "^5.3.45",
     "@mdi/react": "^1.4.0",
@@ -26,24 +26,21 @@
     "mobx": "^5.15.4",
     "mobx-react": "^6.1.8",
     "mobx-utils": "^5.5.5",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-reveal": "^1.2.2",
     "react-router": "^5.1.0",
     "react-router-dom": "^5.1.0",
-    "react-scripts": "3.2.0",
+    "react-scripts": "^4.0.3",
     "react-visibility-sensor": "^5.1.1",
-    "typescript": "3.6.3",
-    "urlsafe-base64": "^1.0.0"
+    "typescript": "^4.4.4"
   },
   "scripts": {
-    "start": "npm-run-all --parallel grunt-start react-start",
-    "build": "npx grunt build && cross-env GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false react-scripts build --profile && node post-build.js",
+    "build": "cross-env GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false react-app-rewired build --profile && node post-build.js",
     "serve": "npm run build && node server",
-    "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "grunt-start": "npx grunt",
-    "react-start": "react-scripts start"
+    "start": "react-app-rewired start",
+    "test": "react-app-rewired test"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -64,13 +61,11 @@
   "devDependencies": {
     "@capacitor/cli": "1.4.0",
     "@types/chrome": "0.0.124",
-    "@types/googlemaps": "^3.40.0",
     "cross-env": "^7.0.2",
-    "grunt": "^1.2.1",
-    "grunt-contrib-less": "^2.0.0",
-    "grunt-contrib-watch": "^1.1.0",
+    "less": "^4.1.1",
+    "less-loader": "^7.3.0",
     "npm-run-all": "^4.1.5",
-    "tslint": "^6.0.0",
-    "tslint-react": "^4.2.0"
+    "react-app-rewired": "^2.1.8",
+    "customize-cra": "^1.0.0"
   }
 }

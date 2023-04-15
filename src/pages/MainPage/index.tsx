@@ -27,7 +27,7 @@ import {
   safeParseJSON,
 } from "../../utils/helpers";
 import { env } from "../../config/env";
-import "./styles.css";
+import "./styles.less";
 import ListControlToolbar from "../../components/ListControlToolbar";
 import { observer } from "mobx-react";
 import { defaultFavIconUrl } from "../../config/constants";
@@ -511,6 +511,7 @@ class MainPage extends React.Component {
   };
 
   handleMenu = (event: any, id: number) => {
+    preventDefaultStopProp(event);
     let tab: chrome.tabs.Tab;
     if (this.showStored) {
       const [tabGroup, _tab] = this.findStoredTabAndGroup(id);
@@ -524,6 +525,7 @@ class MainPage extends React.Component {
     ui.popoverMenu({
       event,
       menuItems,
+      triggerAction: "context-menu",
       showBackdrop: false
     });
     return false;

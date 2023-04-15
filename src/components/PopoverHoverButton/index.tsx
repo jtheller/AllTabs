@@ -2,7 +2,7 @@ import * as React from "react";
 import { IonButton } from "@ionic/react";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import "./styles.css";
+import "./styles.less";
 import { Colors } from "../../lib/types/miscTypes";
 
 interface PopoverHoverButtonProps {

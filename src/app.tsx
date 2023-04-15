@@ -1,5 +1,5 @@
 import React from "react";
-import { IonApp, setupConfig } from "@ionic/react";
+import { IonApp, setupIonicReact } from "@ionic/react";
 import { observer } from "mobx-react";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -23,9 +23,11 @@ import PopoverContainer from "./components/PopoverContainer";
 import { UI, ui } from "./client/ui";
 import MainPage from "./pages/MainPage";
 import { UIText } from "./client/lang";
+import AlertControllerExtractor  from "./components/AlertControllerExtractor";
+import ToastControllerExtractor from "./components/ToastControllerExtractor";
 
 // To keep platform styling consistency, set all styling mode to Material.
-setupConfig({
+setupIonicReact({
   mode: "md"
 });
 
@@ -42,6 +44,8 @@ class App extends React.Component {
     return UIText.ready ? <IonApp>
       <MainPage />
       <PopoverContainer ui={this.ui} />
+      <AlertControllerExtractor />
+      <ToastControllerExtractor />
     </IonApp> : null;
   }
 }

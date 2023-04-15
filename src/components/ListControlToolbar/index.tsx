@@ -1,6 +1,6 @@
 import { IonSearchbar } from "@ionic/react";
 import React from "react";
-import "./styles.css";
+import "./styles.less";
 import { PredefinedColors } from "@ionic/core";
 import { whenFulfill } from "../../utils/helpers";
 import { Tooltip } from "@material-ui/core";

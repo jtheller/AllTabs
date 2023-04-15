@@ -8,6 +8,7 @@ const PopoverContainer: React.FC<{ ui: UI }> = observer(({ ui }) => (
     cssClass="global-popover-container"
     isOpen={ui.popoverVisible}
     onDidDismiss={ui.dismissPopover}
+    reference="event"
     {...ui.popoverProps}
   >
     {ui.popoverComponent && <ui.popoverComponent />}

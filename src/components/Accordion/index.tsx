@@ -2,7 +2,7 @@ import * as React from "react";
 import { MouseEvent, ReactNode } from "react";
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonIcon, IonText } from "@ionic/react";
 import { caretDown, caretUp } from "ionicons/icons";
-import "./styles.css";
+import "./styles.less";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import { asyncPause } from "../../utils/helpers";

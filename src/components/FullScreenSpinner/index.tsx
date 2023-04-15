@@ -1,7 +1,7 @@
 import React from "react";
 import { IonSpinner } from "@ionic/react";
 import { observer } from "mobx-react";
-import "./styles.css";
+import "./styles.less";
 
 export interface FullScreenSpinnerProps extends React.ComponentProps<typeof IonSpinner> {}
 
