@@ -5,7 +5,7 @@ A Chromium extension to view and manage opened tabs.<br><br>
 # Install
 1. Download or clone the repo.
 2. Copy `build` folder to desired location.
-3. Enable "Developer Mode" in your browser extensions setting.
+3. Enable "Developer Mode" ([Edge](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/getting-started/extension-sideloading) / [Chrome](https://developer.chrome.com/docs/extensions/mv2/getstarted/#manifest)) in your browser extensions setting.
 4. Choose "Load unpacked" and choose the `build` folder that you just copied out, feel free to rename the `build` folder.
 5. Extension should be up and running.
 
